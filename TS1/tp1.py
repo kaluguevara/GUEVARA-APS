@@ -146,7 +146,7 @@ for nombre, sig in señales.items():
         resultado = "Es ortogonal"
     else:
         resultado = "No es ortogonal"
-    print("Funcion base seno producto con ", nombre, "=", f"{producto:.6f}", "-->", resultado)
+    print("Funcion base seno producto con", nombre, "=", f"{producto:.6f}", "-->", resultado)
 
 #autocorrelación de x1
 autoco_x1 = np.correlate(x1, x1, mode='full')
