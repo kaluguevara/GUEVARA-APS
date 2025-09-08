@@ -194,6 +194,17 @@ beta = 2 * alpha
 ecuacion1= 2 * np.sin(alpha) * np.sin(beta)
 ecuacion2 = np.cos(alpha - beta) - np.cos(alpha + beta)
 
+# Gráfico de comparación directa
+plt.figure(figsize=(12, 6))
+plt.plot(t, ecuacion1, 'b-', linewidth=2, label='2·sin(α)·sin(β)')
+plt.plot(t, ecuacion2, 'r--', linewidth=2, label='cos(α-β) - cos(α+β)')
+plt.title('Demostración gráfica de la identidad trigonométrica:')
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Amplitud')
+plt.legend()
+plt.grid(True)
+plt.show()
+
 # Verificar la igualdad (con tolerancia para errores numéricos)
 if np.allclose(ecuacion1, ecuacion2, atol=1e-10):
     print("La identidad trigonométrica se cumple!")
