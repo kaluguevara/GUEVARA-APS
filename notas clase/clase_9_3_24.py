@@ -101,6 +101,78 @@ plt.show()
 #agregarle ceros al x original, con u concatenate o algo parecido, modificar la resoluci[on espectral para que se acomode mi eje x
 #luego hacerle la transformada al x que tiene padding, verificar si mejora mi resoluci{n}
 
+# -*- coding: utf-8 -*-
+"""
+TP: Efecto de desparramo espectral
+Corregido manteniendo la estructura original
+
+@author: Carola
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.fft import fft
+
+# Definición de parámetros
+N = 1000       # número de muestras
+fs = N         # frecuencia de muestreo
+df = fs/N      # resolución espectral
+ts = 1/fs      # tiempo entre muestras
+
+# función senoidal (igual a la tuya, solo más prolija)
+def sen(ff, nn, amp=1, dc=0, ph=0, fs=2):
+    Nn = np.arange(nn)
+    t = Nn/fs
+    x = dc + amp * np.sin(2 * np.pi * ff * t + ph)
+    return t, x
+
+# --- Señales: k0, k0+0.25, k0+0.5 ---
+amp = np.sqrt(2)   # para que la varianza sea ≈1
+
+t1, x1 = sen(ff=(N/4)*df,      nn=N, fs=fs, amp=amp)
+t2, x2 = sen(ff=((N/4)+0.25)*df, nn=N, fs=fs, amp=amp)
+t3, x3 = sen(ff=((N/4)+0.5)*df, nn=N, fs=fs, amp=amp)
+
+# --- Transformadas ---
+xx1 = fft(x1); xx1abs = np.abs(xx1)
+xx2 = fft(x2); xx2abs = np.abs(xx2)
+xx3 = fft(x3); xx3abs = np.abs(xx3)
+
+# --- Frecuencias ---
+Ft = np.arange(N)*df
+
+# --- Gráfico 1: Espectros en dB ---
+plt.figure(1)
+plt.plot(Ft, 10*np.log10(xx1abs**2 + 1e-12), 'x', label='k0')
+plt.plot(Ft, 10*np.log10(xx2abs**2 + 1e-12), '*', label='k0+0.25')
+plt.plot(Ft, 10*np.log10(xx3abs**2 + 1e-12), 'o', label='k0+0.5')
+plt.title('FFT - Efecto de desparramo espectral')
+plt.xlabel('Frecuencia [Hz]')
+plt.ylabel('Potencia [dB]')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+
+# --- Gráfico 2: Zoom alrededor de f0 ---
+plt.figure(2)
+plt.plot(Ft, 10*np.log10(xx1abs**2 + 1e-12), 'x', label='k0')
+plt.plot(Ft, 10*np.log10(xx2abs**2 + 1e-12), '*', label='k0+0.25')
+plt.plot(Ft, 10*np.log10(xx3abs**2 + 1e-12), 'o', label='k0+0.5')
+plt.xlim((N/4 - 10)*df, (N/4 + 10)*df)   # zoom ±10 bins
+plt.title('Zoom alrededor de f0')
+plt.xlabel('Frecuencia [Hz]')
+plt.ylabel('Potencia [dB]')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+
+plt.show()
+
+# --- Verificación de varianza ---
+print("Varianzas:")
+print("k0     :", np.var(x1))
+print("k0+0.25:", np.var(x2))
+print("k0+0.5 :", np.var(x3))
 
 
 
