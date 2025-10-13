@@ -176,39 +176,61 @@ def sistema2(x):
         y[n] = xn + yn10
     return y
 
-#uso x1 como señal de entrada senoidal
+# TIEMPOS Y SEÑALES PARA CADA SISTEMA
 
-# Respuesta al impulso de cada sistema
-N = 50
-delta = np.zeros(N)
+# SIST 1 (FIR) con menos muestras para ver la senoidal claramente
+t1 = np.linspace(0, 0.003, 60)  # menos tiempo
+x1 = np.sin(2*np.pi*1000*t1)    
+# SIST 2 (IIR) con más muestras para ver el crecimiento exponencial
+t2 = np.linspace(0, 0.05, 120)  # mas tiempo
+x2 = np.sin(2*np.pi*1000*t2)
+
+# RTA AL IMPULSO
+N_impulso = 50
+delta = np.zeros(N_impulso)
 delta[0] = 1
 h1 = sistema1(delta)
 h2 = sistema2(delta)
 
-# Salidas a una senoidal
+# SALIDAS
 y1 = sistema1(x1)
-y2 = sistema2(x1)
+y2 = sistema2(x2)
 
-# Graficar
-plt.figure(figsize=(12,8))
+plt.figure(figsize=(12, 8))
 
-plt.subplot(2,2,1)
+#GRAFICO 1: Respuesta al impulso - Sistema 1
+plt.subplot(2, 2, 1)
 n = np.arange(len(h1))
 plt.stem(n, h1)
-plt.title("Respuesta al impulso h[n] - Sistema 1")
+plt.title("Respuesta al impulso - Sistema 1 (FIR)")
+plt.xlabel("Muestra [n]")
+plt.ylabel("Amplitud")
+plt.grid(True)
 
-plt.subplot(2,2,2)
-plt.plot(t[:len(y1)], y1)
+#GRAFICO 2: Salida senoidal - Sistema 1 CORREGIDO
+plt.subplot(2, 2, 2)
+plt.plot(t1*1000, y1)  # Convertir a milisegundos
 plt.title("Salida para senoidal - Sistema 1")
+plt.xlabel("Tiempo [ms]")
+plt.ylabel("Amplitud")
+plt.grid(True)
 
-plt.subplot(2,2,3)
+#GRAFICO 3: Respuesta al impulso - Sistema 2
+plt.subplot(2, 2, 3)
 n = np.arange(len(h2))
 plt.stem(n, h2)
-plt.title("Respuesta al impulso h[n] - Sistema 2")
+plt.title("Respuesta al impulso - Sistema 2 (IIR)")
+plt.xlabel("Muestra [n]")
+plt.ylabel("Amplitud")
+plt.grid(True)
 
-plt.subplot(2,2,4)
-plt.plot(t[:len(y2)], y2)
+# GRAFICO 4: Salida senoidal - Sistema 2 CORREGIDO
+plt.subplot(2, 2, 4)
+plt.plot(t2*1000, y2)  #convertir a milisegundos
 plt.title("Salida para senoidal - Sistema 2")
+plt.xlabel("Tiempo [ms]")
+plt.ylabel("Amplitud")
+plt.grid(True)
 
 plt.tight_layout()
 plt.show()
