@@ -228,12 +228,12 @@ def analizar_audio(archivo_wav):
     - Un solo canal es más fácil de analizar
     - Evita duplicar energía al sumar ambos canales
     '''
-    #--> caro pedile al chat que te explique pero es bardo
+
     if len(datos_audio.shape) > 1:
         datos_audio = datos_audio.mean(axis=1)
         print("Convertido a mono")
     
-    # Normalizar entre -1 y 1 --> caro pedile al chat que te explique pero es bardo
+    # Normalizar entre -1 y 1 
     datos_normalizados = datos_audio.astype(np.float32) / np.max(np.abs(datos_audio))
     # si no normalizo son valores muy grandes
     
@@ -256,5 +256,5 @@ def analizar_audio(archivo_wav):
     return datos_normalizados, frecuencia_muestreo, energia
 
 # USO DEL CÓDIGO
-archivo = "soundwav.wav"  # CAMBIA POR EL NOMBRE DE TU ARCHIVO
+archivo = "soundwav.wav"  
 datos, fs, energia = analizar_audio(archivo)
