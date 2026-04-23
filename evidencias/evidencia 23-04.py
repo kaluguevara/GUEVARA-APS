@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep 15 12:38:43 2025
+Created on Thu Apr 23 19:33:55 2026
 
 @author: gueva
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft import fft
@@ -133,4 +132,66 @@ plt.ylabel('Potencia [dB]')
 plt.legend() 
 plt.grid() 
 plt.tight_layout() 
+plt.show()
+
+#---------------------------------------------------
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = x3
+
+#sin
+X = np.fft.fft(x)
+f = np.fft.fftfreq(N, d=1/fs)
+
+#la centras
+X_shift = np.fft.fftshift(X)
+f_shift = np.fft.fftshift(f)
+
+mag = 20*np.log10(np.abs(X_shift) + 1e-12)
+fase = np.angle(X_shift)
+
+# con
+M = 9*N
+x_pad = np.zeros(M)
+x_pad[:N] = x
+
+X_pad = np.fft.fft(x_pad)
+f_pad = np.fft.fftfreq(M, d=1/fs)
+
+X_pad_shift = np.fft.fftshift(X_pad)
+f_pad_shift = np.fft.fftshift(f_pad)
+
+mag_pad = 20*np.log10(np.abs(X_pad_shift) + 1e-12)
+fase_pad = np.angle(X_pad_shift)
+
+# ===============================
+# SUBPLOTS: MAGNITUD + FASE ALINEADOS
+# ===============================
+
+fig, axs = plt.subplots(2, 1, sharex=True, figsize=(10, 6))
+
+# -------- MAGNITUD --------
+axs[0].plot(f_shift, mag, 'o-', label='Sin padding')
+axs[0].plot(f_pad_shift, mag_pad, '-', label='Con padding')
+
+axs[0].set_title('Magnitud')
+axs[0].set_ylabel('Magnitud [dB]')
+axs[0].legend()
+axs[0].grid()
+
+# -------- FASE --------
+axs[1].plot(f_shift, fase, 'o-', label='Sin padding')
+axs[1].plot(f_pad_shift, fase_pad, '-', label='Con padding')
+
+axs[1].set_title('Fase')
+axs[1].set_xlabel('Frecuencia [Hz]')
+axs[1].set_ylabel('Fase [rad]')
+axs[1].set_ylim(-np.pi, np.pi)  # clave para ver los saltos
+axs[1].legend()
+axs[1].grid()
+
+# -------- AJUSTES --------
+plt.tight_layout()
 plt.show()
