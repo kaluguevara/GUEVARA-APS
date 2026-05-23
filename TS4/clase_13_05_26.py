@@ -157,90 +157,110 @@ for nombre, X in fft_alto.items():
     plt.tight_layout()
     plt.show()
 
-# hist est frec
+# histogramas
 
-# recalculo SOLO las frecuencias estimadas
+estilos = {
+    "Rectangular": {"histtype": "stepfilled", "alpha": 0.3},
+    "Flattop": {"histtype": "stepfilled", "alpha": 0.3},
+    "Blackman-Harris": {"histtype": "stepfilled", "alpha": 0.3},
+    "Hann": {"histtype": "stepfilled", "alpha": 0.3}
+}
+
+#ESTIMACIONES INDIVIDUALES DE FRECUENCIA
+def obtener_frec_est(X, fs):
+    N = X.shape[0]
+    indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
+    frecs_est = indices * fs / N
+    return frecs_est
+
+
+#CÁLCULO DE FRECUENCIAS ESTIMADAS
 frec_est_bajo = {}
 frec_est_alto = {}
 
 for nombre, X in fft_bajo.items():
-    indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
-    frec_est_bajo[nombre] = indices * fs / N
+    frec_est_bajo[nombre] = obtener_frec_est(X, fs)
 
 for nombre, X in fft_alto.items():
-    indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
-    frec_est_alto[nombre] = indices * fs / N
+    frec_est_alto[nombre] = obtener_frec_est(X, fs)
+# frec snr 3db
 
+plt.figure(figsize=(8,5))
 
-# subplots frec snr bajo
+for nombre, frecs in frec_est_bajo.items():
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+    plt.hist(
+        frecs,
+        bins=20,
+        label=nombre,
+        **estilos[nombre]
+    )
 
-for i, (nombre, frecs) in enumerate(frec_est_bajo.items()):
-
-    axs[i].hist(frecs, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Frecuencia estimada [Hz]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
-
-fig.suptitle("Histogramas estimador de frecuencia (SNR = 3 dB)")
+plt.title("Estimador de frecuencia (SNR = 3 dB)")
+plt.xlabel("Frecuencia estimada [Hz]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
 
-# subplots frec snr alto
+# frec snr 10db
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+plt.figure(figsize=(8,5))
 
-for i, (nombre, frecs) in enumerate(frec_est_alto.items()):
+for nombre, frecs in frec_est_alto.items():
 
-    axs[i].hist(frecs, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Frecuencia estimada [Hz]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
+    plt.hist(
+        frecs,
+        bins=20,
+        label=nombre,
+        **estilos[nombre]
+    )
 
-fig.suptitle("Histogramas estimador de frecuencia (SNR = 10 dB)")
+plt.title("Estimador de frecuencia (SNR = 10 dB)")
+plt.xlabel("Frecuencia estimada [Hz]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
 
-# hist est amp
+# ammp snr 3db
 
-# subplots amp snr bajo
+plt.figure(figsize=(8,5))
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+for nombre, amps in amplitudes_bajo.items():
 
-for i, (nombre, amps) in enumerate(amplitudes_bajo.items()):
+    plt.hist(
+        amps,
+        bins=20,
+        label=nombre,
+        **estilos[nombre]
+    )
 
-    axs[i].hist(amps, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Amplitud estimada [V]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
-
-fig.suptitle("Histogramas estimador de amplitud (SNR = 3 dB)")
+plt.title("Estimador de amplitud (SNR = 3 dB)")
+plt.xlabel("Amplitud estimada [V]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
 
-# subplots amp snr alto
+# amp snr 10db
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+plt.figure(figsize=(8,5))
 
-for i, (nombre, amps) in enumerate(amplitudes_alto.items()):
+for nombre, amps in amplitudes_alto.items():
 
-    axs[i].hist(amps, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Amplitud estimada [V]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
+    plt.hist(amps,bins=20,label=nombre,**estilos[nombre])
 
-fig.suptitle("Histogramas estimador de amplitud (SNR = 10 dB)")
+plt.title("Estimador de amplitud (SNR = 10 dB)")
+plt.xlabel("Amplitud estimada [V]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()

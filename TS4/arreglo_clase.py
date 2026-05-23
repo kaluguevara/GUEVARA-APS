@@ -58,19 +58,21 @@ for nombre, vent in ventanas.items():
     fft_alto[nombre] = calcular_fft(x_SNR_ALTO, vent)
 
 #ESTIMACIÓN DE AMPLITUD
-def estimar_amp(X, ventana, f_objetivo, fs):
-    idx = (f_objetivo * N / fs).astype(int)
-    cg = np.sum(ventana) / N                 
+def estimar_amp(X, ventana, fs):
+    f_estimada = 250   # Hz
+    idx = int(f_estimada * N / fs)
+    cg = np.sum(ventana) / N
     return 2 * np.abs(X[idx, np.arange(X.shape[1])]) / cg
 
 amplitudes_bajo = {}
 amplitudes_alto = {}
 
 for nombre in fft_bajo.keys():
-    amplitudes_bajo[nombre] = estimar_amp(fft_bajo[nombre], ventanas[nombre], f_base, fs)
-for nombre in fft_alto.keys():  
-    amplitudes_alto[nombre] = estimar_amp(fft_alto[nombre], ventanas[nombre], f_base, fs)
 
+    amplitudes_bajo[nombre] = estimar_amp(fft_bajo[nombre],ventanas[nombre],fs)
+
+for nombre in fft_alto.keys():
+    amplitudes_alto[nombre] = estimar_amp(fft_alto[nombre],ventanas[nombre],fs)
 #SESGO Y VARIANZA
 def obtener_metricas(amplitudes, A_teorica):
     sesgo = np.mean(amplitudes) - A_teorica
@@ -87,21 +89,21 @@ for nombre in amplitudes_alto.keys():
     metricas_alto[nombre] = obtener_metricas(amplitudes_alto[nombre], A_real)
   
 #ESTIMADOR DE FRECUENCIA
-def estimar_frec(X, fs, f_base):
-    N = X.shape[0]                              
+def estimar_frec(X, fs):
+    N = X.shape[0]
     indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
     frecs_est = indices * fs / N
-    sesgo = np.mean(frecs_est - f_base)
+    sesgo = np.mean(frecs_est - 250)
     varianza = np.var(frecs_est)
     return sesgo, varianza
 
 frec_bajo = {}
 for k, v in fft_bajo.items():
-    frec_bajo[k] = estimar_frec(v, fs, f_base)
+    frec_bajo[k] = estimar_frec(v, fs)
 
 frec_alto = {}
 for k, v in fft_alto.items():
-    frec_alto[k] = estimar_frec(v, fs, f_base)
+    frec_alto[k] = estimar_frec(v, fs)
 
 #TABLAS DE RESULTADOS
 print("\nResultados (SNR = 3 dB) - Estimación de AMPLITUD")
@@ -157,90 +159,104 @@ for nombre, X in fft_alto.items():
     plt.tight_layout()
     plt.show()
 
-# hist est frec
+# histogramas
 
-# recalculo SOLO las frecuencias estimadas
+estilos = {
+    "Rectangular": {"histtype": "stepfilled", "alpha": 0.3},
+    "Flattop": {"histtype": "stepfilled", "alpha": 0.3},
+    "Blackman-Harris": {"histtype": "stepfilled", "alpha": 0.3},
+    "Hann": {"histtype": "stepfilled", "alpha": 0.3}
+}
+
+#ESTIMACIONES INDIVIDUALES DE FRECUENCIA
+def obtener_frec_est(X, fs):
+    N = X.shape[0]
+    indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
+    frecs_est = indices * fs / N
+    return frecs_est
+
+
+#CÁLCULO DE FRECUENCIAS ESTIMADAS
 frec_est_bajo = {}
 frec_est_alto = {}
 
 for nombre, X in fft_bajo.items():
-    indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
-    frec_est_bajo[nombre] = indices * fs / N
+    frec_est_bajo[nombre] = obtener_frec_est(X, fs)
 
 for nombre, X in fft_alto.items():
-    indices = np.argmax(np.abs(X[:N//2, :]), axis=0)
-    frec_est_alto[nombre] = indices * fs / N
+    frec_est_alto[nombre] = obtener_frec_est(X, fs)
+# frec snr 3db
 
+plt.figure(figsize=(8,5))
 
-# subplots frec snr bajo
+for nombre, frecs in frec_est_bajo.items():
+    plt.hist(frecs,bins=20,label=nombre,**estilos[nombre])
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
-
-for i, (nombre, frecs) in enumerate(frec_est_bajo.items()):
-
-    axs[i].hist(frecs, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Frecuencia estimada [Hz]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
-
-fig.suptitle("Histogramas estimador de frecuencia (SNR = 3 dB)")
+plt.title("Estimador de frecuencia (SNR = 3 dB)")
+plt.xlabel("Frecuencia estimada [Hz]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
 
-# subplots frec snr alto
+# frec snr 10db
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+plt.figure(figsize=(8,5))
 
-for i, (nombre, frecs) in enumerate(frec_est_alto.items()):
+for nombre, frecs in frec_est_alto.items():
 
-    axs[i].hist(frecs, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Frecuencia estimada [Hz]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
+    plt.hist(
+        frecs,
+        bins=20,
+        label=nombre,
+        **estilos[nombre]
+    )
 
-fig.suptitle("Histogramas estimador de frecuencia (SNR = 10 dB)")
+plt.title("Estimador de frecuencia (SNR = 10 dB)")
+plt.xlabel("Frecuencia estimada [Hz]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
 
-# hist est amp
+# ammp snr 3db
 
-# subplots amp snr bajo
+plt.figure(figsize=(8,5))
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+for nombre, amps in amplitudes_bajo.items():
 
-for i, (nombre, amps) in enumerate(amplitudes_bajo.items()):
+    plt.hist(
+        amps,
+        bins=20,
+        label=nombre,
+        **estilos[nombre]
+    )
 
-    axs[i].hist(amps, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Amplitud estimada [V]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
-
-fig.suptitle("Histogramas estimador de amplitud (SNR = 3 dB)")
+plt.title("Estimador de amplitud (SNR = 3 dB)")
+plt.xlabel("Amplitud estimada [V]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
 
-# subplots amp snr alto
+# amp snr 10db
 
-fig, axs = plt.subplots(2, 2, figsize=(12,8))
-axs = axs.ravel()
+plt.figure(figsize=(8,5))
 
-for i, (nombre, amps) in enumerate(amplitudes_alto.items()):
+for nombre, amps in amplitudes_alto.items():
 
-    axs[i].hist(amps, bins=20)
-    axs[i].set_title(f"{nombre}")
-    axs[i].set_xlabel("Amplitud estimada [V]")
-    axs[i].set_ylabel("Cantidad")
-    axs[i].grid(True)
+    plt.hist(amps,bins=20,label=nombre,**estilos[nombre])
 
-fig.suptitle("Histogramas estimador de amplitud (SNR = 10 dB)")
+plt.title("Estimador de amplitud (SNR = 10 dB)")
+plt.xlabel("Amplitud estimada [V]")
+plt.ylabel("Cantidad")
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
